@@ -10,18 +10,18 @@ Lx = 10  # size in the x-direction
 Lz = 1   # size in the vertical (z) direction 
 
 # Set the grid size
-Nx = 256  # number of gridpoints in the x-direction
-Nz = 32   # number of gridpoints in the z-direction
+Nx = 600  # number of gridpoints in the x-direction
+Nz = 60  # number of gridpoints in the z-direction
 
 # Some timestepping parameters
-max_Δt = 0.05 # maximum allowable timestep 
-duration = 20 # The non-dimensional duration of the simulation
+max_Δt = 0.02 # maximum allowable timestep 
+duration = 15 # The non-dimensional duration of the simulation
 
 # Set the Reynolds number (Re=Ul/ν)
 Re = 5000
 
 # Set the change in the non-dimensional buouancy 
-Δb = 1 
+Δb = 4
 
 # Set the amplitude of the random perturbation (kick)
 kick = 0.05
@@ -68,7 +68,7 @@ model = NonhydrostaticModel(; grid,
 uᵢ(x, y, z) = kick * randn()
 vᵢ(x, y, z) = 0
 wᵢ(x, y, z) = kick * randn()
-bᵢ(x, y, z) = (Δb / 2) * (1 + tanh((x - xl) / Lf))
+bᵢ(x, y, z) = (Δb / 2) * (1 + tanh((x - xl) / Lf)) + (Δb / 2) * (1 - tanh((x - 10 + xl) / Lf)) - 1 
 cᵢ(x, y, z) = exp(-((x - Lx / 2) / (Lx / 50))^2) # Initialize with a thin tracer (dye) streak in the center of the domain
 
 # Send the initial conditions to the model to initialize the variables
@@ -114,7 +114,7 @@ simulation.output_writers[:xz_slices] =
     JLD2OutputWriter(model, (; u, v, w, b, c),
                           filename = filename * ".jld2",
                           indices = (:, 1, :),
-                         schedule = TimeInterval(0.2),
+                         schedule = TimeInterval(0.1),
                             overwrite_existing = true)
 
 # If you are running in 3D, you could save an xy slice like this:                             
