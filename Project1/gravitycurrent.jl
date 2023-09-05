@@ -69,8 +69,10 @@ uᵢ(x, y, z) = kick * randn()
 vᵢ(x, y, z) = 0
 wᵢ(x, y, z) = kick * randn()
 bᵢ(x, y, z) = ifelse(x > xl && x < 10 - xl, Δb * z, 0)
-# bᵢ(x, y, z) = ((Δb / 2) * (1 + tanh((x - xl) / Lf)) + (Δb / 2) * (1 - tanh((x - 10 + xl) / Lf)) - 1) * 
-cᵢ(x, y, z) = exp(-((x - Lx / 2) / (Lx / 50))^2) # Initialize with a thin tracer (dye) streak in the center of the domain
+# bᵢ(x, y, z) = ((Δb / 2) * (1 + tanh((x - xl) / Lf)) + (Δb / 2) * (1 - tanh((x - 10 + xl) / Lf)) - 1) * z 
+# cᵢ(x, y, z) = ((Δb / 2) * (1 - tanh((x - xl) / Lf)) + (Δb / 2) * (1 + tanh((x - 10 + xl) / Lf)) - 1)
+cᵢ(x, y, z) = ifelse(x > xl && x < 10 - xl, 0, 1)
+# cᵢ(x, y, z) = exp(-((x - Lx / 2) / (Lx / 50))^2) # Initialize with a thin tracer (dye) streak in the center of the domain
 
 # Send the initial conditions to the model to initialize the variables
 set!(model, u = uᵢ, v = vᵢ, w = wᵢ, b = bᵢ, c = cᵢ)
