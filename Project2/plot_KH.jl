@@ -34,6 +34,13 @@ iterations = parse.(Int, keys(file_xz["timeseries/t"]))
 
 @info "Making an animation from saved data..."
 
+# Grid size
+Nx = 256  # number of gridpoints in the x-direction
+Nz = 64   # number of gridpoints in the z-direction
+
+u_pertubation = zeros(Nx, Nz, length(iterations))
+time = zeros(length(iterations))
+
 # Here, we loop over all iterations
 anim = @animate for (i, iter) in enumerate(iterations)
 
@@ -49,10 +56,10 @@ anim = @animate for (i, iter) in enumerate(iterations)
 
     t = file_xz["timeseries/t/$iter"];
 
-        b_xz_plot = heatmap(xb, zb, b_xz'; color = :thermal, xlabel = "x", ylabel = "z", aspect_ratio = :equal, xlims = (0, Lx), ylims = (0, Lz)); 
-        ω_xz_plot = heatmap(xω, zω, ω_xz'; color = :thermal, xlabel = "x", ylabel = "z", aspect_ratio = :equal, xlims = (0, Lx), ylims = (0, Lz)); 
-        χ_xz_plot = heatmap(xχ, zχ, χ_xz'; color = :thermal, xlabel = "x", ylabel = "z", aspect_ratio = :equal, xlims = (0, Lx), ylims = (0, Lz)); 
-        ϵ_xz_plot = heatmap(xϵ, zϵ, ϵ_xz'; color = :thermal, xlabel = "x", ylabel = "z", aspect_ratio = :equal, xlims = (0, Lx), ylims = (0, Lz)); 
+        b_xz_plot = Plots.heatmap(xb, zb, b_xz'; color = :thermal, xlabel = "x", ylabel = "z", aspect_ratio = :equal, xlims = (0, Lx), ylims = (0, Lz)); 
+        ω_xz_plot = Plots.heatmap(xω, zω, ω_xz'; color = :thermal, xlabel = "x", ylabel = "z", aspect_ratio = :equal, xlims = (0, Lx), ylims = (0, Lz)); 
+        χ_xz_plot = Plots.heatmap(xχ, zχ, χ_xz'; color = :thermal, xlabel = "x", ylabel = "z", aspect_ratio = :equal, xlims = (0, Lx), ylims = (0, Lz)); 
+        ϵ_xz_plot = Plots.heatmap(xϵ, zϵ, ϵ_xz'; color = :thermal, xlabel = "x", ylabel = "z", aspect_ratio = :equal, xlims = (0, Lx), ylims = (0, Lz)); 
 
     u_title = @sprintf("u, t = %s", round(t));
     v_title = @sprintf("v, t = %s", round(t));
@@ -62,12 +69,19 @@ anim = @animate for (i, iter) in enumerate(iterations)
     ϵ_title = @sprintf("KE dissipation (ϵ), t = %s", round(t));
     χ_title = @sprintf("buoyancy variance dissipation (χ), t = %s", round(t));
 
+    u_pertubation[:,:,i] = u_xz .- mean(u_xz, dims = 1) 
+    time[i] = t
+
 # Combine the sub-plots into a single figure
-    plot(b_xz_plot, ω_xz_plot, ϵ_xz_plot, χ_xz_plot, layout = (4, 1), size = (1200, 800),
-    title = [b_title ω_title ϵ_title χ_title])
+    Plots.plot(b_xz_plot, ω_xz_plot, ϵ_xz_plot, χ_xz_plot, layout = (4, 1), size = (1200, 800),
+        title = [b_title ω_title ϵ_title χ_title])
 
     iter == iterations[end] && close(file_xz)
 end
 
+
 # Save the animation to a file
 mp4(anim, "KH.mp4", fps = 20) # hide
+
+e_kin = mean(mean(1/2 .* u_pertubation .* u_pertubation, dims=1), dims=2)
+Plotly.plot(time, e_kin[1,1,:], Layout(xaxis_title="time",yaxis_title="kinetic energy",plot_bgcolor="white",yaxis=attr(gridcolor="lightgrey",zerolinecolor="black"),xaxis=attr(gridcolor="lightgrey",zerolinecolor="black")))
