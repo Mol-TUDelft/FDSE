@@ -25,15 +25,18 @@ model = NonhydrostaticModel(; grid,
               advection = UpwindBiasedFifthOrder(),   # Specify the advection scheme.  Another good choice is WENO() which is more accurate but slower
             timestepper = :RungeKutta3,   # Set the timestepping scheme, here 3rd order Runge-Kutta
                 tracers = :c,
-                coriolis = BetaPlane(rotation_rate = 7.292115e-5, latitude = 0, radius = 6371e3)   # set Coriolis parameter using the Beta-plane approximation 
+                coriolis = BetaPlane(rotation_rate = 7.292115e-5, latitude = 90, radius = 6371e3)   # set Coriolis parameter using the Beta-plane approximation 
 )
+
+# println(BetaPlane(rotation_rate = 7.292115e-5, latitude = 80, radius = 6371e3) )
 
 # Set wavenumbers associated with the initial condition
 k = 2 * pi / 200kilometers 
 l = 2 * pi / 200kilometers
+println(k)
 
 # Define functions for the initial conditions
-u₀ = 0.001   # units: m/s
+u₀ = 0.05   # units: m/s
 uᵢ(x, y, z) = u₀ * sin(k * x) * sin(l * y)
 vᵢ(x, y, z) = u₀ * (k / l) * cos(k * x) * cos(l * y)
 wᵢ(x, y, z) = 0
@@ -43,7 +46,7 @@ cᵢ(x, y, z) = sin(k * x) * cos(l * y) # Here, we set the function for c so tha
 set!(model, u = uᵢ, v = vᵢ, w = wᵢ, c = cᵢ)
 
 # Create a 'simulation' to run the model for a specified length of time
-simulation = Simulation(model, Δt = 10hours, stop_iteration = 1000)
+simulation = Simulation(model, Δt = 10hours, stop_iteration = 30000)
 
 # Add callback that prints progress message during simulation
 progress(sim) = @info string("Iter: ", iteration(sim),

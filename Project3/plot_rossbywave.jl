@@ -57,7 +57,7 @@ anim = @animate for (i, iter) in enumerate(iterations)
     w_xy_plot = Plots.heatmap(xu/1e3, yu/1e3, u_xy'; color = :balance, xlabel = "x (km)", ylabel = "y (km)", aspect_ratio = :equal, title=w_title, fontsize=14);  
     c_xy_plot = Plots.heatmap(xc/1e3, yc/1e3, c_xy'; color = :balance, xlabel = "x (km)", ylabel = "y (km)", aspect_ratio = :equal, title=c_title, fontsize=14);  
 
-    plot(u_xy_plot, c_xy_plot, layout = (1, 2), size = (1300, 600))
+    Plots.plot(u_xy_plot, c_xy_plot, layout = (1, 2), size = (1300, 600))
     
     iter == iterations[end] && close(file_xy)
 end
